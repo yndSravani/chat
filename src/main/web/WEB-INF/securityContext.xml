@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
+    <security:global-method-security pre-post-annotations="enabled" />
+
+    <security:http pattern="/api/login" security="none"/>
+    <security:http pattern="/api/signup" security="none"/>
+
+    <security:http pattern="/api/**" entry-point-ref="restAuthenticationEntryPoint" create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter  before="FORM_LOGIN_FILTER" ref="jwtAuthenticationFilter"/>
+    </security:http>
+
+    <beans:bean name="jwtAuthenticationFilter" id="jwtAuthenticationFilter" class="org.challenge.security.JwtAuthenticationFilter">
+        <beans:property name="authenticationManager" ref="authenticationManager" />
+        <beans:property name="authenticationSuccessHandler" ref="jwtAuthenticationSuccessHandler" />
+    </beans:bean>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider>
+            <security:user-service id="userDetailsService" properties="classpath:users.properties"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>
